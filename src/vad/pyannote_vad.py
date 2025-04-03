@@ -12,8 +12,8 @@ from ray import serve
 from ray.serve.handle import DeploymentHandle
 
 @serve.deployment(
-    ray_actor_options={"num_cpus": 1},
-    autoscaling_config={"min_replicas": 1, "max_replicas": 10},
+    ray_actor_options={"num_cpus": 1, "memory": 4 * 1024 * 1024 * 1024},
+    autoscaling_config={"min_replicas": 1, "max_replicas": 4},
 )
 class PyannoteVAD(VADInterface):
     """
@@ -37,10 +37,12 @@ class PyannoteVAD(VADInterface):
         
         if auth_token is None:
             raise ValueError("Missing required env var in PYANNOTE_AUTH_TOKEN or argument in --vad-args: 'auth_token'")
-        
+            
         pyannote_args = kwargs.get('pyannote_args', {"onset": 0.5, "offset": 0.5, "min_duration_on": 0.3, "min_duration_off": 0.3})
-        self.model = Model.from_pretrained(model_name, use_auth_token=auth_token)
-        self.vad_pipeline = VoiceActivityDetection(segmentation=self.model)
+        self.vad_pipeline = VoiceActivityDetection.from_pretrained(
+            "pyannote/segmentation",
+            use_auth_token=auth_token
+        )
         self.vad_pipeline.instantiate(pyannote_args)
 
     async def detect_activity(self, client):
