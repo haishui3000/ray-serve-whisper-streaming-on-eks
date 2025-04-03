@@ -39,10 +39,13 @@ class PyannoteVAD(VADInterface):
             raise ValueError("Missing required env var in PYANNOTE_AUTH_TOKEN or argument in --vad-args: 'auth_token'")
             
         pyannote_args = kwargs.get('pyannote_args', {"onset": 0.5, "offset": 0.5, "min_duration_on": 0.3, "min_duration_off": 0.3})
-        self.vad_pipeline = VoiceActivityDetection.from_pretrained(
-            "pyannote/segmentation",
-            use_auth_token=auth_token
-        )
+        # self.vad_pipeline = VoiceActivityDetection.from_pretrained(
+        #     "pyannote/segmentation",
+        #     use_auth_token=auth_token
+        # )
+        model = Model.from_pretrained("pyannote/segmentation", use_auth_token=auth_token)
+        self.vad_pipeline = VoiceActivityDetection(segmentation=model)
+        # self.vad_pipeline = Model.from_pretrained("pyannote/segmentation", use_auth_token=auth_token)
         self.vad_pipeline.instantiate(pyannote_args)
 
     async def detect_activity(self, client):
