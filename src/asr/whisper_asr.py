@@ -5,7 +5,7 @@ import os
 
 class WhisperASR(ASRInterface):
     def __init__(self, **kwargs):
-        model_name = kwargs.get('model_name', "openai/whisper-large")
+        model_name = kwargs.get('model_name', "openai/whisper-large-v3")
         self.asr_pipeline = pipeline("automatic-speech-recognition", model=model_name)
 
     async def transcribe(self, client):
